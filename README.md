@@ -57,3 +57,13 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+
+# WealthWise FinTech Dashboard
+
+A modern financial tracking application built with **Angular 21**, focused on real-time performance and data persistence.
+
+### 🚀 Key Features
+*   **Signal-based State Management:** Uses Angular Signals for high-performance UI updates.
+*   **Real-time Visualizations:** Integrated Donut Charts via Chart.js to track Income vs. Expenses.
+*   **Persistence:** Data survives page refreshes using LocalStorage.
+*   **Modern Build Engine:** Built with the new Vite-based Angular application builder.
