@@ -1,0 +1,238 @@
+<div class="dashboard">
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">Wealth Guard</span>
+        <span class="brand-sub">Agentic AI · Risk Management</span>
+      </div>
+    </div>
+
+    <span class="status-badge" [class]="agent.status()">
+      <span class="status-dot"></span>
+      {{ statusLabel() }}
+    </span>
+    <button class="trigger-btn" routerLink="/real-agentic">
+      <svg width="22" height="22" viewBox="0 0 640 640"><path d="M352 64C352 46.3 337.7 32 320 32C302.3 32 288 46.3 288 64L288 128L192 128C139 128 96 171 96 224L96 448C96 501 139 544 192 544L448 544C501 544 544 501 544 448L544 224C544 171 501 128 448 128L352 128L352 64zM160 432C160 418.7 170.7 408 184 408L216 408C229.3 408 240 418.7 240 432C240 445.3 229.3 456 216 456L184 456C170.7 456 160 445.3 160 432zM280 432C280 418.7 290.7 408 304 408L336 408C349.3 408 360 418.7 360 432C360 445.3 349.3 456 336 456L304 456C290.7 456 280 445.3 280 432zM400 432C400 418.7 410.7 408 424 408L456 408C469.3 408 480 418.7 480 432C480 445.3 469.3 456 456 456L424 456C410.7 456 400 445.3 400 432zM224 240C250.5 240 272 261.5 272 288C272 314.5 250.5 336 224 336C197.5 336 176 314.5 176 288C176 261.5 197.5 240 224 240zM368 288C368 261.5 389.5 240 416 240C442.5 240 464 261.5 464 288C464 314.5 442.5 336 416 336C389.5 336 368 314.5 368 288zM64 288C64 270.3 49.7 256 32 256C14.3 256 0 270.3 0 288L0 384C0 401.7 14.3 416 32 416C49.7 416 64 401.7 64 384L64 288zM608 256C590.3 256 576 270.3 576 288L576 384C576 401.7 590.3 416 608 416C625.7 416 640 401.7 640 384L640 288C640 270.3 625.7 256 608 256z"/></svg>
+      Real Agentic AI
+    </button>
+  </header>
+
+  <!-- ── METRICS ROW ────────────────────────────────────── -->
+  <section class="metrics-row" aria-label="Portfolio metrics">
+    <div class="metric-card">
+      <div class="metric-label">Portfolio value</div>
+      <div class="metric-value">{{ portfolioValue | currency:'USD':'symbol':'1.0-0' }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Tech exposure</div>
+      <div class="metric-value" [class]="techExposureClass()">{{ agent.techExposure() }}%</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Risk score</div>
+      <div class="metric-value" [class]="riskScoreClass()">{{ riskScoreDisplay() }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Volatility (30d)</div>
+      <div class="metric-value warn">{{ volatilityDisplay() }}</div>
+    </div>
+  </section>
+
+  <!-- ── PORTFOLIO + LOG ───────────────────────────────── -->
+  <section class="two-panel">
+
+    <!-- Allocation -->
+    <div class="panel card">
+      <h3 class="panel-title">Current allocation</h3>
+      <div class="alloc-list">
+        @for (item of agent.allocation(); track item.label) {
+          <div class="alloc-row">
+            <span class="alloc-label">{{ item.label }}</span>
+            <div class="alloc-track">
+              <div class="alloc-fill" [style.width.%]="item.pct" [style.background]="item.color"></div>
+            </div>
+            <span class="alloc-pct" [class.over]="item.label === 'Tech' && item.pct > 50">{{ item.pct }}%</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Agent log -->
+    <div class="panel card">
+      <h3 class="panel-title">Agent activity log</h3>
+      <div class="log-scroll" #logArea>
+        @for (entry of agent.log(); track $index) {
+          <div class="log-line">
+            <span class="log-ts">{{ entry.time }}</span>
+            <span class="log-msg" [class]="entry.type">{{ entry.message }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ── TRIGGER BUTTONS ───────────────────────────────── -->
+  <section class="trigger-row">
+    <button class="trigger-btn" (click)="runAgent()" [disabled]="agent.thinking()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Run Wealth Guard agent
+    </button>
+    <button class="trigger-btn" (click)="simulateVolatility()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Simulate market spike
+    </button>
+  </section>
+
+  <!-- ── AGENT PANEL ───────────────────────────────────── -->
+  <section class="agent-panel card" aria-live="polite">
+
+    <!-- Thinking state -->
+    @if (agent.thinking()) {
+      <div class="thinking-bar">
+        <div class="thinking-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span class="thinking-label">{{ agent.thinkingLabel() }}</span>
+      </div>
+    }
+
+    <!-- Tool chips -->
+    @if (agent.toolsDone() || agent.thinking()) {
+      <div class="tool-chips">
+        <span class="chip" [class.done]="agent.toolsDone()">
+          @if (agent.toolsDone()) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          }
+          getPortfolioAllocation()
+        </span>
+        <span class="chip" [class.done]="agent.toolsDone()">
+          @if (agent.toolsDone()) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          }
+          getMarketVolatility("NASDAQ")
+        </span>
+        <span class="chip" [class.done]="agent.toolsDone()">
+          @if (agent.toolsDone()) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          }
+          getRiskProfile(user_id)
+        </span>
+        <span class="chip" [class.done]="agent.toolsDone()">
+          @if (agent.toolsDone()) {
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          }
+          computeRebalancingPlan()
+        </span>
+      </div>
+    }
+
+    <!-- Agent message -->
+    @if (agent.agentVisible()) {
+      <div class="agent-message">
+        <div class="agent-msg-header">
+          <strong class="agent-name">Wealth Guard</strong>
+          <span class="agent-ts">· {{ agent.log()[agent.log().length - 1]?.time }}</span>
+        </div>
+        <p>
+          I noticed your tech sector exposure hit <strong>65%</strong> while the NASDAQ is showing elevated
+          volatility (±18.2% over 30 days). This exceeds your conservative risk profile threshold of 50%.
+        </p>
+        <p>I've computed a rebalancing plan:</p>
+
+        <table class="rebal-table">
+          <thead>
+            <tr>
+              <th>Asset</th>
+              <th>Current</th>
+              <th>Target</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of agent.rebalancingPlan; track row.asset) {
+              <tr>
+                <td>{{ row.asset }}</td>
+                <td>{{ row.current }}</td>
+                <td>{{ row.target }}</td>
+                <td [class]="row.actionType">{{ row.action }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        <p class="agent-note">
+          Estimated projected risk score after rebalancing: <strong class="ok">5.1 / 10</strong>.
+          Tax impact minimal — trades within tax-advantaged account.
+        </p>
+        <p>Would you like me to execute this trade now?</p>
+      </div>
+
+      <div class="agent-actions">
+        <button class="btn-exec" (click)="executeTrade()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Execute trade now
+        </button>
+        <button class="btn-review" (click)="runAgent()">Review full analysis ↗</button>
+      </div>
+    }
+
+    <!-- Success state -->
+    @if (agent.execSuccess()) {
+      <div class="exec-success">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Trade executed successfully. Portfolio rebalanced. New risk score: <strong>5.1 / 10</strong>.
+      </div>
+    }
+
+  </section>
+
+  <!-- ── TRANSACTIONS ──────────────────────────────────── -->
+  <section class="tx-section card">
+    <div class="tx-header">
+      <h3 class="panel-title" style="margin:0">Recent transactions</h3>
+      <button class="btn-add" (click)="generateMockTransaction()">+ Add random</button>
+    </div>
+
+    <table class="tx-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Merchant</th>
+          <th>Category</th>
+          <th>Amount</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of transactions(); track item.id) {
+          <tr>
+            <td class="tx-date">{{ item.date | date:'shortDate' }}</td>
+            <td>{{ item.merchant }}</td>
+            <td>
+              <span class="badge" [class.income]="item.category === 'Income'" [class.expense]="item.category === 'Expense'">
+                {{ item.category }}
+              </span>
+            </td>
+            <td [class.pos]="item.amount > 0" [class.neg]="item.amount <= 0">
+              {{ item.amount | currency }}
+            </td>
+            <td>
+              <div class="table-actions">
+                <button class="btn-icon" (click)="toggleTransactionType(item)" title="Flip type">⇄</button>
+                <button class="btn-icon delete" (click)="deleteTransaction(item.id)" title="Delete">✕</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+</div>

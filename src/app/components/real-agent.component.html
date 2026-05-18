@@ -1,0 +1,208 @@
+<div class="agent-root">
+
+  <!-- ── HEADER ──────────────────────────────────────────── -->
+  <header class="agent-header">
+    <div class="agent-brand">
+      <div class="brand-pill">REAL</div>
+      <div>
+        <div class="brand-title">Wealth Guard — Agentic AI</div>
+        <div class="brand-sub">Claude claude-sonnet-4 / Gemini · Real tool calls · Live API</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span class="turn-badge" [class.active]="agent.isRunning()">
+        Turn {{ agent.turnCount() }} / 10
+      </span>
+      <button class="btn-reset" (click)="reset()" [disabled]="agent.isRunning()">↺ Reset</button>
+    </div>
+  </header>
+
+  <!-- ── PROMPT PRESETS ──────────────────────────────────── -->
+  <section class="presets">
+    <span class="presets-label">Try:</span>
+    @for (p of presets; track p.label) {
+      <button class="preset-btn" (click)="runPreset(p.prompt)" [disabled]="agent.isRunning()">
+        {{ p.label }}
+      </button>
+    }
+  </section>
+
+  <!-- ── MAIN GRID ───────────────────────────────────────── -->
+  <div class="main-grid">
+
+    <!-- LEFT: Tool call inspector ──────────────────────── -->
+    <aside class="inspector card">
+      <div class="inspector-head">
+        <span class="panel-label">Tool call inspector</span>
+        <span class="tool-count">{{ agent.toolCallLogs().length }} calls</span>
+      </div>
+
+      <div class="inspector-body" #inspectorBody>
+        @if (agent.toolCallLogs().length === 0 && !agent.isRunning()) {
+          <div class="empty-state">
+            <div class="empty-icon">⚙</div>
+            <div class="empty-text">Tool calls will appear here<br>as the LLM executes them</div>
+          </div>
+        }
+
+        @for (log of agent.toolCallLogs(); track log.id) {
+          <div class="tool-card" [class.expanded]="expandedTool === log.id"
+               (click)="toggleTool(log.id)">
+            <div class="tool-card-head">
+              <div class="tool-info">
+                <span class="tool-check">✓</span>
+                <span class="tool-name">{{ log.name }}</span>
+              </div>
+              <div class="tool-meta">
+                <span class="tool-ts">{{ log.timestamp }}</span>
+                <span class="tool-dur">{{ log.durationMs }}ms</span>
+                <span class="tool-arrow">{{ expandedTool === log.id ? '▲' : '▼' }}</span>
+              </div>
+            </div>
+
+            @if (expandedTool === log.id) {
+              <div class="tool-detail">
+                <div class="detail-section">
+                  <div class="detail-label">INPUT (what LLM sent)</div>
+                  <pre class="code-block">{{ log.input | json }}</pre>
+                </div>
+                <div class="detail-section">
+                  <div class="detail-label">OUTPUT (tool returned to LLM)</div>
+                  <pre class="code-block">{{ log.result | json }}</pre>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (agent.isRunning()) {
+          <div class="tool-card thinking-card">
+            <div class="tool-card-head">
+              <div class="tool-info">
+                <span class="spinner"></span>
+                <span class="tool-name" style="font-style:italic">LLM deciding next step…</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </aside>
+
+    <!-- RIGHT: Agent conversation ──────────────────────── -->
+    <section class="conversation card">
+      <div class="convo-head">
+        <span class="panel-label">Agent reasoning trace</span>
+        @if (agent.isRunning()) {
+          <span class="live-badge">
+            <span class="live-dot"></span> Live
+          </span>
+        }
+      </div>
+
+      <div class="convo-body" #convoBody>
+        @if (agent.thoughts().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">🤖</div>
+            <div class="empty-text">Pick a preset above or type<br>a question to start the agent</div>
+          </div>
+        }
+
+        @for (thought of agent.thoughts(); track $index) {
+          <div class="thought" [class]="'thought-' + thought.type">
+            <span class="thought-icon">
+              @switch (thought.type) {
+                @case ('thinking')    { 💭 }
+                @case ('tool_call')   { ⚙️ }
+                @case ('tool_result') { ✅ }
+                @case ('final')       { 🎯 }
+              }
+            </span>
+            <div class="thought-body">
+              <span class="thought-tag">{{ thought.type | uppercase }}</span>
+              <div class="thought-text"
+                   [class.final-text]="thought.type === 'final'">{{ thought.text }}</div>
+            </div>
+          </div>
+        }
+
+        @if (agent.isRunning()) {
+          <div class="thought thought-thinking">
+            <span class="thought-icon">💭</span>
+            <div class="thought-body">
+              <span class="thought-tag">THINKING</span>
+              <div class="thinking-dots">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Final answer box -->
+      @if (agent.finalAnswer()) {
+        <div class="final-box">
+          <div class="final-box-label">Agent recommendation</div>
+          <div class="final-box-text">{{ agent.finalAnswer() }}</div>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (agent.errorMsg()) {
+        <div class="error-box">
+          ⚠ {{ agent.errorMsg() }}
+        </div>
+      }
+
+      <!-- Follow-up input -->
+      <div class="input-row">
+        <input
+          class="chat-input"
+          [(ngModel)]="followUpText"
+          placeholder="Ask a follow-up (e.g. 'execute the trade now')"
+          (keydown.enter)="sendFollowUp()"
+          [disabled]="agent.isRunning()"
+        />
+        <button class="btn-send" (click)="sendFollowUp()"
+                [disabled]="agent.isRunning() || !followUpText.trim()">
+          {{ agent.isRunning() ? '…' : '→' }}
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── ARCHITECTURE NOTE ───────────────────────────────── -->
+  <div class="arch-note">
+    <div class="arch-row">
+      <div class="arch-step">
+        <div class="arch-num">1</div>
+        <div class="arch-label">User prompt → Gemini API</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-num">2</div>
+        <div class="arch-label">LLM returns <code>tool_use</code></div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-num">3</div>
+        <div class="arch-label">App executes tool</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-num">4</div>
+        <div class="arch-label">Send <code>tool_result</code> back</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-step">
+        <div class="arch-num">5</div>
+        <div class="arch-label">LLM reasons → repeat or answer</div>
+      </div>
+    </div>
+    <div class="arch-sub">
+      Replace <code>mockGetPortfolioAllocation()</code> with a real
+      <code>HttpClient</code> call to your broker API to go fully production.
+    </div>
+  </div>
+
+</div>

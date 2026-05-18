@@ -1,8 +1,11 @@
+export type TransactionCategory = 'Income' | 'Expense';
+export type TransactionStatus = 'Completed' | 'Pending' | 'Failed';
+
 export interface Transaction {
   id: string;
   date: Date;
   amount: number;
-  category: 'Investment' | 'Income' | 'Expense' | 'Transfer';
   merchant: string;
-  status: 'Completed' | 'Pending' | 'Flagged';
+  category: TransactionCategory;
+  status: TransactionStatus;
 }
