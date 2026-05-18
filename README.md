@@ -1,4 +1,4 @@
-# WealthWise | Modern FinTech Dashboard
+# WealthWise | Agent Simulation UI | Real Agentic AI
 
 A high-performance financial tracking application built with **Angular 21**, demonstrating modern architectural patterns, signal-based state management, and real-time data visualization.
 
@@ -18,6 +18,22 @@ A high-performance financial tracking application built with **Angular 21**, dem
 - **Styling**: SCSS (Flexbox/Grid)
 - **Build Tool**: Vite (Angular Application Builder)
 - **Polyfills**: Zone.js for seamless third-party library integration
+
+## First Version and Latest Version
+
+Right now it is Agent Simulation UI — not Rule-based, not Agentic. Here's the honest breakdown:
+What it doesrunAgent()Runs setTimeout loops, updates Angular signalssimulateVolatility()Sets two hardcoded numbers: 22.7 and 8.1executeTrade()Changes pct: 65 → 50 in a local array
+No backend is called. No LLM thinks. No real data moves.
+To make it a real Rule-based Agent (simpler), you replace setTimeout with HttpClient calls to your backend, which runs fixed if exposure > 50% → rebalance logic — no LLM involved.
+To make it a real Agentic AI (your target architecture), the backend calls Claude/GPT with tool definitions like this:
+typescript// backend sends this to Anthropic /v1/messages:
+tools: [
+  { name: "getPortfolioAllocation",  ... },
+  { name: "getMarketVolatility",     ... },
+  { name: "computeRebalancingPlan",  ... }
+]
+// LLM decides WHICH tools to call, WHEN, and WHY
+// That reasoning is what makes it "Agentic"
 
 ## 📦 Installation & Setup
 
