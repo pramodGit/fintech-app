@@ -66,7 +66,7 @@ The key difference: in a real agent, the **LLM decides** which tools to call, wh
 
 | Layer | Technology |
 |---|---|
-| Framework | Angular 19+ (Standalone Components) |
+| Framework | Angular 21+ (Standalone Components) |
 | State | Angular Signals · `computed()` · `effect()` |
 | Routing | Angular Router (lazy-loaded routes) |
 | Styling | SCSS · CSS custom properties · Flexbox/Grid |
