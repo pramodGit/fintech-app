@@ -12,7 +12,7 @@
 npm-debug.log
 yarn-error.log
 
-/proxy-server/.env
+# /proxy-server/.env
 
 # IDEs and editors
 .idea/

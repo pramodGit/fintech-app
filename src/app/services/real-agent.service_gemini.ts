@@ -245,7 +245,7 @@ export class RealAgentService {
       this.addThought({ type: 'thinking', text: `Turn ${this.turnCount()} — running Gemini AI routing...` });
 
       // ── Step 1: Request Node Proxy (Configured with Gemini Payload Structural Schemas) ──
-      const response = await fetch('http://localhost:3000/api/agent', { 
+      const response = await fetch('/api/fintech-real-agentic', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

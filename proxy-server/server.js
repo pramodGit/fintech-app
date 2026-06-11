@@ -1,41 +1,47 @@
 // proxy-server/server.js
 // Run: node server.js
-// This sits between your Angular app and api.anthropic.com
+// This sits securely between your Angular app and Google Gemini
 
-const express  = require('express');
-const cors     = require('cors');
-const fetch    = require('node-fetch');
+const express = require('express');
+const cors    = require('cors');
+const fetch   = require('node-fetch');
 require('dotenv').config();
 
 const app  = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3003;
 
-// ── Middleware ────────────────────────────────────────────────────────────────
+// ── Middleware & CORS ──────────────────────────────────────────────────────────
 
 app.use(express.json({ limit: '2mb' }));
 
-// Allow requests from Angular dev server
-app.use(cors({
+const corsOptions = {
   origin: [
-    'http://localhost:4200',   // Angular dev server
-    'http://localhost:4000',   // Angular SSR (if used)
-    process.env.FRONTEND_URL, // production frontend URL
+    'http://localhost:4200',          // Angular dev server
+    'http://localhost:4000',          // Angular SSR (if used)
+    'https://fintech.pramod.click',   // Your production deployment domain
+    process.env.FRONTEND_URL,
   ].filter(Boolean),
   methods: ['POST', 'GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+// Apply CORS options globally
+app.use(cors(corsOptions));
+
+// Explicitly catch browser preflight OPTIONS requests early
+app.options('*', cors(corsOptions));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // ── Main proxy endpoint ───────────────────────────────────────────────────────
-// Angular calls POST /api/agent
-// This server forwards it to Anthropic and returns the response
 
-app.post('/api/agent', async (req, res) => {
+app.post('/fintech-real-agentic', async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -45,28 +51,13 @@ app.post('/api/agent', async (req, res) => {
   }
 
   try {
-    // const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type':         'application/json',
-    //     'x-api-key':            apiKey,
-    //     'anthropic-version':    '2023-06-01',
-    //   },
-    //   body: JSON.stringify(req.body), // forward exactly what Angular sent
-    // });
-
-    // const data = await anthropicRes.json();
-
-    // if (!anthropicRes.ok) {
-    //   return res.status(anthropicRes.status).json(data);
-    // }
-
-    // res.json(data);
-
-    // 1. Extract the model parameter and the rest of the payload from Angular
+    // 1. Deconstruct the payload from your Angular service
     const { model, ...geminiPayload } = req.body;
 
-    // Make the actual request to the official Google Developer API endpoint
+    console.log(`\n🤖 [${new Date().toLocaleTimeString()}] Proxying Request`);
+    console.log(`   Model: ${model}`);
+
+    // 2. Dispatch to the official Google Developer API endpoint
     const googleResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
@@ -80,7 +71,7 @@ app.post('/api/agent', async (req, res) => {
 
     const data = await googleResponse.json();
 
-    // 4. Return Google's response directly back to your Angular app
+    // 3. Return Google's response directly back to your Angular app
     return res.status(googleResponse.status).json(data);
 
   } catch (err) {
@@ -92,7 +83,9 @@ app.post('/api/agent', async (req, res) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 app.listen(PORT, () => {
-  console.log(`✅  Proxy running at http://localhost:${PORT}`);
-  console.log(`    Angular  →  POST http://localhost:${PORT}/api/agent`);
-  console.log(`    Proxy    →  POST https://api.anthropic.com/v1/messages`);
+  console.log(`=================================================`);
+  console.log(`✅ Gemini Secure Proxy running at http://localhost:${PORT}`);
+  console.log(`   Angular   →   POST http://localhost:${PORT}/api/agent`);
+  console.log(`   Proxy     →   POST https://generativelanguage.googleapis.com`);
+  console.log(`=================================================`);
 });

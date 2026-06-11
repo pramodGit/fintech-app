@@ -261,7 +261,7 @@ export class RealAgentService {
       this.addThought({ type: 'thinking', text: `Turn ${this.turnCount()} — calling Claude...` });
 
       // ── Step 1: Call Claude API ──────────────────────────────────────────
-      const response = await fetch('http://localhost:3000/api/agent', { // proxy — avoids CORS
+      const response = await fetch('/api/fintech-real-agentic', { // proxy — avoids CORS
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
