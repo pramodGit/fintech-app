@@ -3,6 +3,7 @@ import {
   AfterViewChecked, effect
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RealAgentService } from '../services/real-agent.service_gemini';
 
@@ -14,7 +15,7 @@ interface Preset {
 @Component({
   selector: 'app-real-agent',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './real-agent.component.html',
   styleUrl:    './real-agent.component.scss',
 })

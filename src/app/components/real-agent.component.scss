@@ -83,7 +83,7 @@ body {
 
 .brand-pill {
   background: var(--green);
-  color: #001a0a;
+  color: #93a198;
   font-family: var(--sans);
   font-size: 10px;
   font-weight: 700;
@@ -92,6 +92,11 @@ body {
   border-radius: 4px;
   flex-shrink: 0;
 }
+  
+  .brand-pill a {
+    color: #93a198;
+    text-decoration: none;
+  }
 
 .brand-title {
   font-family: var(--sans);
